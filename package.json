@@ -24,7 +24,7 @@
     "test_cmd": "node ./bin/winser.js",
     "pkg": "pkg -t win package.json --output setup/avi-player-ui.exe",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "build": "cross-env NODE_ENV=production webpack --progress "
   },
   "dependencies": {
     "at-ui": "^1.2.0-beta",
@@ -35,7 +35,6 @@
     "http-errors": "~1.6.2",
     "morgan": "~1.9.0",
     "node-cmd": "^3.0.0",
-    "node-windows": "^0.1.14",
     "sqlite3": "^4.0.2",
     "vue": "^2.3.4"
   },

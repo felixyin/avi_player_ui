@@ -3,10 +3,16 @@
         <div class="header" :style="{height:toolbarHeight}">
             <div class="row">
                 <at-button icon="icon-download">播放</at-button>
+                <at-button icon="icon-download" onclick="document.getElementById('inputfile').click();">导入AVI</at-button>
+                <at-button icon="icon-download">播放</at-button>
+                <at-button icon="icon-download">播放</at-button>
                 <at-button icon="icon-user-plus">暂停</at-button>
                 <at-button icon="icon-edit"></at-button>
                 <at-button type="primary" icon="icon-search"></at-button>
             </div>
+            <form action="/importAvi" method="post">
+                <input type="file" name="file[]" id="inputfile" multiple webkitdirectory />
+            </form>
         </div>
         <div class="content">
             <div class="left">
