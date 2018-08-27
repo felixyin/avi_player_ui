@@ -9,6 +9,17 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+
+//设置跨域访问
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+    res.header("X-Powered-By", ' 3.2.1');
+    res.header("Content-Type", "application/json;charset=utf-8");
+    next();
+});
+
 /*function set_avi_folder(avi_path){
     console.log('sdjkfjskldfjskldfjkl')
     app.use(express.static(avi_path));
@@ -27,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // FIXME 这里的路径需要读取配置文件，设置界面需提供目录选择，选择后写入配置文件。并重新启动服务。然后刷新界面
-app.use(express.static('D:\\avi_player\\14'));
+app.use(express.static('D:\\avi_player\\14\\'));
 
 
 app.use('/', indexRouter);

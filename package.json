@@ -19,6 +19,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www.js",
+    "dev_start": "nodemon ./bin/www.js",
     "install_service": "node ./bin/install.js",
     "uninstall_service": "node ./bin/uninstall.js",
     "test_cmd": "node ./bin/winser.js",
@@ -27,21 +28,28 @@
     "build": "cross-env NODE_ENV=production webpack --progress "
   },
   "dependencies": {
-    "at-ui": "^1.2.0-beta",
-    "at-ui-style": "^1.3.2",
+    "async": "^2.6.1",
+    "axios": "^0.18.0",
+    "babel-polyfill": "^6.26.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
+    "ejs": "^2.6.1",
+    "element-ui": "^2.4.6",
     "express": "~4.16.0",
     "http-errors": "~1.6.2",
+    "moment": "^2.22.2",
     "morgan": "~1.9.0",
     "node-cmd": "^3.0.0",
+    "node-xlsx": "^0.12.1",
     "sqlite3": "^4.0.2",
-    "vue": "^2.3.4"
+    "vue": "^2.3.4",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.1",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
+    "babel-plugin-component": "^1.1.1",
     "babel-preset-env": "^1.5.2",
     "babel-preset-stage-2": "^6.24.1",
     "cross-env": "^5.0.1",
