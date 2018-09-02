@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import App from './App.vue'
-import 'at-ui-style'
-import AtUI from 'at-ui'
 import axios from 'axios'
 import "babel-polyfill";
 import moment from 'moment'
@@ -11,6 +9,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 // Vue.use(ElementUI);
 import {
     Container,
+    Row,
+    Col,
     Header,
     Aside,
     Main,
@@ -27,6 +27,7 @@ import {
     TableColumn,
     Slider,
     Dialog,
+    Tag,
     Loading,
     Message,
     MessageBox,
@@ -36,6 +37,8 @@ import {
 Vue.prototype.$ELEMENT = {size: 'small', zIndex: 3000};
 
 Vue.use(Container);
+Vue.use(Row);
+Vue.use(Col);
 Vue.use(Header);
 Vue.use(Aside);
 Vue.use(Main);
@@ -52,6 +55,7 @@ Vue.use(Table);
 Vue.use(TableColumn);
 Vue.use(Slider);
 Vue.use(Dialog);
+Vue.use(Tag);
 
 Vue.prototype.$loading = Loading.service;
 Vue.prototype.$msgbox = MessageBox;

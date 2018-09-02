@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -16,7 +15,7 @@ app.all('*', function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
     res.header("X-Powered-By", ' 3.2.1');
-    res.header("Content-Type", "application/json;charset=utf-8");
+    // res.header("Content-Type", "application/json;charset=utf-8");
     next();
 });
 
@@ -27,22 +26,21 @@ app.all('*', function(req, res, next) {
 }*/
 
 // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'ejs');
+/*app.set('views', path.join(__dirname, 'dist'));
+app.engine('html', require('ejs').__express);
+app.set('view engine', 'html');*/
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // FIXME 这里的路径需要读取配置文件，设置界面需提供目录选择，选择后写入配置文件。并重新启动服务。然后刷新界面
-app.use(express.static('D:\\avi_player\\14\\'));
-
+// app.use(express.static('D:\\avi_player\\14\\'));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

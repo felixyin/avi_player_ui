@@ -14,7 +14,7 @@ var Service = nw.Service;
 var svc = new Service({
     name: 'Avi Player Background Service',    //服务名称
     description: '专有AVI格式播放器后台服务，作者尹彬，QQ：1052921694', //描述
-    script: path.resolve('bin/www.js')  //nodejs项目要启动的文件路径
+    script: path.resolve('server.exe')  //nodejs项目要启动的文件路径
 });
 
 svc.on('install', () => {

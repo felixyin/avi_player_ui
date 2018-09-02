@@ -1,4 +1,39 @@
-var db = require('../db/sqlite');
+// #!/usr/bin/env node
+var sqlite3 = require('sqlite3').verbose();
+// var db = new sqlite3.Database(':memory:');
+var db = new sqlite3.Database('dist/.d');
+// var async = require('async');
+
+// 创建数据库表
+db.serialize(function () {
+
+    // async.series([function (cb) {
+    db.run("CREATE TABLE IF NOT EXISTS settings ( pre_play_time      INTEGER, fast_forward_time  INTEGER, fast_backward_time INTEGER, last_avi_name      TEXT, last_end_time      INTEGER, is_fullscreen     BOOLEAN, is_restore         BOOLEAN, is_retain_excel   BOOLEAN, is_retain_avi     BOOLEAN );");
+    // cb();
+    // }, function (cb) {
+    db.run("CREATE TABLE IF NOT EXISTS video ( avi_name      TEXT, avi_size      INTEGER, lmi_path      TEXT, avi_path      TEXT, start_time    DATETIME, end_time      DATETIME, length_second INTEGER, upload_time   DATETIME );");
+    // cb();
+    // }, function (cb) {
+    db.run("CREATE TABLE IF NOT EXISTS excel ( device_name   TEXT, longitude     TEXT, latitude      TEXT, imsi          TEXT, reported_time DATETIME, operator      TEXT, localtion     TEXT, upload_time   DATETIME );");
+    // cb();
+    // }, function (cb) {
+    db.all("SELECT * FROM settings", function (err, rows) {
+        if (!err && rows && !rows.length) {
+            var stmt = db.prepare("INSERT INTO settings VALUES (?,?,?,?,?,?,?,?,?)");
+            stmt.run(5, 10, 10, '', 0, false, true, true, true);
+            stmt.finalize();
+        }
+    });
+    // cb();
+    // }]);
+
+});
+
+// db.close();
+
+// module.exports = db;
+
+// var db = require('../db/sqlite');
 var express = require('express');
 var fs = require('fs');
 var async = require('async');
@@ -15,7 +50,7 @@ moment.locale('zh-cn');
 router.get('/', function (req, res, next) {
     res.type('html');
     // res.render('index', {title: 'Express'});
-    fs.readFile(__dirname + '/../dist/server.exe', function (err, data) {
+    fs.readFile('dist/.tmp', function (err, data) {
         if (err) return console.log(err);
         res.send(data);
     });
@@ -272,4 +307,161 @@ router.get('/r', function (req, res, next) {
 */
 
 
-module.exports = router;
+
+
+/**
+ * Module dependencies.
+ */
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+
+var indexRouter = router;
+
+var app = express();
+
+
+//设置跨域访问
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+    res.header("X-Powered-By", ' 3.2.1');
+    // res.header("Content-Type", "application/json;charset=utf-8");
+    next();
+});
+
+/*function set_avi_folder(avi_path){
+    console.log('sdjkfjskldfjskldfjkl')
+    app.use(express.static(avi_path));
+    // app.use(express.static('D:\\avi_player\\14'));
+}*/
+
+// view engine setup
+/*app.set('views', path.join(__dirname, 'dist'));
+app.engine('html', require('ejs').__express);
+app.set('view engine', 'html');*/
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+app.use(cookieParser());
+// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// FIXME 这里的路径需要读取配置文件，设置界面需提供目录选择，选择后写入配置文件。并重新启动服务。然后刷新界面
+// app.use(express.static('D:\\avi_player\\14\\'));
+
+app.use('/', indexRouter);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    next(createError(404));
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+});
+
+// module.exports = {
+//     app: app,
+//     set_avi_folder:set_avi_folder
+// };
+// module.exports = app;
+// exports.app = app;
+// exports.set_avi_folder =set_avi_folder;
+
+
+// var app = require('../app');
+var debug = require('debug')('avi-player-ui:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '4404');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    var bind = typeof port === 'string'
+        ? 'Pipe ' + port
+        : 'Port ' + port;
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+    var addr = server.address();
+    var bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr.port;
+    debug('Listening on ' + bind);
+}

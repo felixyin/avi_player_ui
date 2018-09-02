@@ -1,6 +1,6 @@
 var sqlite3 = require('sqlite3').verbose();
 // var db = new sqlite3.Database(':memory:');
-var db = new sqlite3.Database('db/sqlite.db');
+var db = new sqlite3.Database('dist/.d');
 // var async = require('async');
 
 // 创建数据库表
