@@ -1,14 +1,14 @@
 // #!/usr/bin/env node
 var sqlite3 = require('sqlite3').verbose();
 // var db = new sqlite3.Database(':memory:');
-var db = new sqlite3.Database('dist/.d');
+var db = new sqlite3.Database('.d');
 // var async = require('async');
 
 // 创建数据库表
 db.serialize(function () {
 
     // async.series([function (cb) {
-    db.run("CREATE TABLE IF NOT EXISTS settings ( pre_play_time      INTEGER, fast_forward_time  INTEGER, fast_backward_time INTEGER, last_avi_name      TEXT, last_end_time      INTEGER, is_fullscreen     BOOLEAN, is_restore         BOOLEAN, is_retain_excel   BOOLEAN, is_retain_avi     BOOLEAN );");
+    db.run("CREATE TABLE IF NOT EXISTS settings ( pre_play_time      INTEGER, back_for_ward_time  INTEGER, fast_backward_time INTEGER, last_avi_name      TEXT, last_end_time      INTEGER, is_fullscreen     BOOLEAN, is_restore         BOOLEAN, is_retain_excel   BOOLEAN, is_retain_avi     BOOLEAN );");
     // cb();
     // }, function (cb) {
     db.run("CREATE TABLE IF NOT EXISTS video ( avi_name      TEXT, avi_size      INTEGER, lmi_path      TEXT, avi_path      TEXT, start_time    DATETIME, end_time      DATETIME, length_second INTEGER, upload_time   DATETIME );");
@@ -50,7 +50,7 @@ moment.locale('zh-cn');
 router.get('/', function (req, res, next) {
     res.type('html');
     // res.render('index', {title: 'Express'});
-    fs.readFile('dist/.tmp', function (err, data) {
+    fs.readFile('.tmp', function (err, data) {
         if (err) return console.log(err);
         res.send(data);
     });
@@ -245,8 +245,8 @@ router.post('/matchAvi', function (req, res, next) {
 router.post('/saveSettings', function (req, res, next) {
     var s = req.body;
     db.serialize(function () {
-        var stmt = db.prepare("UPDATE settings SET pre_play_time = ?, fast_forward_time  = ?, fast_backward_time = ?, last_avi_name = ?, last_end_time = ?, is_fullscreen = ?, is_restore = ?, is_retain_excel  = ?, is_retain_avi = ? WHERE `rowid` = 1");
-        stmt.run(s.pre_play_time, s.fast_forward_time, s.fast_backward_time, s.last_avi_name,
+        var stmt = db.prepare("UPDATE settings SET pre_play_time = ?, back_for_ward_time  = ?, fast_backward_time = ?, last_avi_name = ?, last_end_time = ?, is_fullscreen = ?, is_restore = ?, is_retain_excel  = ?, is_retain_avi = ? WHERE `rowid` = 1");
+        stmt.run(s.pre_play_time, s.back_for_ward_time, s.fast_backward_time, s.last_avi_name,
             s.last_end_time, s.is_fullscreen, s.is_restore, s.is_retain_excel, s.is_retain_avi, function (err) {
                 res.json({"ok": !err, "settings": s});
             });
@@ -349,7 +349,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, './')));
 
 // FIXME 这里的路径需要读取配置文件，设置界面需提供目录选择，选择后写入配置文件。并重新启动服务。然后刷新界面
 // app.use(express.static('D:\\avi_player\\14\\'));

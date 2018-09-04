@@ -10,10 +10,10 @@
     "js": "node --harmony"
   },
   "watch": [
-    "bin/www.js",
+    "www",
     "app.js",
-    "db/**",
-    "routes/**"
+    "sqlite.js",
+    "index.js"
   ],
   "env": {
     "NODE_ENV": "development"

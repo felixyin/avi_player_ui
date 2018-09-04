@@ -1,28 +1,12 @@
 {
-  "bin": "bin/winser.js",
-  "pkg": {
-    "scripts": [
-      "app.js",
-      "bin/*.js",
-      "routes/**/*.js"
-    ],
-    "assets": [
-      "package.json",
-      "setup/setup.bat",
-      "bin/daemon/*",
-      "public/**/*",
-      "views/**/*"
-    ]
-  },
   "name": "avi-player-ui",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "start": "node server.exe",
-    "dev_start": "nodemon ./bin/www.js",
-    "install_service": "node ./bin/install.js",
-    "uninstall_service": "node ./bin/uninstall.js",
-    "test_cmd": "node ./bin/winser.js",
+    "dev_start": "nodemon www",
+    "install_service": "node is.js",
+    "uninstall_service": "node us.js",
     "pkg": "pkg -t win package.json --output setup/avi-player-ui.exe",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress "

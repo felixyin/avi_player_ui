@@ -62,8 +62,8 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             // FIXME 生产模式.tmp，开发模式：index.html
-            filename: "index.html",
-            // filename: ".tmp",
+            // filename: "index.html",
+            filename: ".tmp",
             template: 'src/index.html'
         })
     ]

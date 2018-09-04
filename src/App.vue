@@ -2,8 +2,8 @@
     <div id="desktop">
         <input ref="excelFile" name="excel" type="file" multiple="multiple"
                accept="application/vnd.ms-excel" style="display: none;"/>
-        <audio src="find.mp3" controls="controls"></audio>
-        <audio src="not_find.mp3" controls="controls"></audio>
+        <audio ref="foundIt" id="FI" src="found_it.mp3" style="display: none;"></audio>
+        <audio ref="notFound" id="NF" src="not_found.mp3" style="display: none;"></audio>
         <el-dialog
                 title="软件设置"
                 :visible.sync="centerDialogVisible"
@@ -15,27 +15,17 @@
                                      size="mini"></el-input-number>
                     秒
                 </el-form-item>
-                <el-form-item label="快进步数" :label-width="formLabelWidth">
-                    <el-input-number v-model="settings.fast_forward_time" :max="50" :min="-50" :step="1"
+                <el-form-item label="快进快退步数" :label-width="formLabelWidth">
+                    <el-input-number v-model="settings.back_for_ward_time" :max="50" :min="-50" :step="1"
                                      size="mini"></el-input-number>
                     秒
                 </el-form-item>
-                <el-form-item label="快退步数" :label-width="formLabelWidth">
-                    <el-input-number v-model="settings.fast_backward_time" :max="50" :min="-50" :step="1"
+                <el-form-item label="反向查找范围" :label-width="formLabelWidth">
+                    <el-input-number v-model="settings.reverse_lookup_time" :max="1200" :min="0" :step="1"
                                      size="mini"></el-input-number>
                     秒
-                </el-form-item>
-                <el-form-item label="是否全屏" :label-width="formLabelWidth">
-                    <!--<el-input v-model="form.areg" auto-complete="off"></el-input>-->
-                    <el-switch
-                            v-model="settings.is_fullscreen"
-                            active-text="开启全屏"
-                            inactive-text="关闭全屏"
-                            v-on:change="switchFullScreen"
-                    ></el-switch>
                 </el-form-item>
                 <el-form-item label="还原上次播放" :label-width="formLabelWidth">
-                    <!--<el-input v-model="form.areg" auto-complete="off"></el-input>-->
                     <el-switch
                             v-model="settings.is_restore"
                             active-text="还原"
@@ -65,6 +55,9 @@
                 <el-button-group>
                     <el-button :type="play_type" icon="el-icon-caret-right" v-on:click="play">{{play_text}}</el-button>
                     <el-button type="danger" icon="el-icon-circle-close" v-on:click="stop">停止</el-button>
+                </el-button-group>
+                <el-button-group>
+                    <el-button type="primary" icon="el-icon-view" v-on:click="reverse_lookup">查找时间点</el-button>
                 </el-button-group>
                 <el-button-group>
                     <el-button type="primary" plain icon="el-icon-d-arrow-left" v-on:click="playPre">上一视频</el-button>
@@ -98,9 +91,9 @@
                         <el-table
                                 ref="aviTable"
                                 :data="filter_avi_data"
-                                highlight-current-row
                                 @current-change="clickAviRow"
                                 :height="clientHeight"
+                                :row-class-name="calRowStyle"
                                 style="width: 100%">
                             <el-table-column type="expand">
                                 <template slot-scope="props">
@@ -139,10 +132,10 @@
                         </el-table>
                     </el-aside>
                 </div>
-                <el-container v-bind:style="{ height: clientHeight + 'px' }">
+                <el-container v-bind:style="{ height: mainHeight+ 'px' }">
                     <el-main>
                         <div id="avi_div" style="height: 99%;">
-                            <object id="P" name="P" height="100%"   type="video/x-ms-wmv" width="100%">
+                            <object id="P" name="P" height="100%" type="video/x-ms-wmv" width="100%">
                                 <!--<param name="filename" value="000F7C6806DC_20180814102104_0000/Camera0_180814101355.avi"/>-->
                                 <!--<param name="filename" value=""/>-->
                                 <param name="autostart" value="true"/>
@@ -183,15 +176,15 @@
                 <div style="margin-top: 10px;">
                     <center>
                         <el-input placeholder="时间点搜索" prefix-icon="el-icon-search" v-model="search_excel_value"
-                                  clearable style="width: 95%;"></el-input>
+                                  clearable style="width: 160px;"></el-input>
                     </center>
                     <el-aside width="170px">
                         <el-table
                                 ref="excelTable"
                                 :data="filter_excel_data"
-                                highlight-current-row
                                 @current-change="clickExcelRow"
                                 :height="clientHeight"
+                                :row-class-name="calRowStyle"
                                 style="width: 100%">
                             <el-table-column type="expand">
                                 <template slot-scope="props">
@@ -248,18 +241,29 @@
         created() {
             let _this = this;
 
-            let minusHeight = this.toolbarHeight;
-            // alert(`${document.documentElement.clientHeight}`);
             // 获取浏览器可视区域高度
+            let minusHeight = this.toolbarHeight + 48;
             _this.clientHeight = `${document.documentElement.clientHeight}` - minusHeight;         //document.body.clientWidth;
+            _this.mainHeight = _this.clientHeight + 68;
             window.onresize = function () {
                 _this.clientHeight = `${document.documentElement.clientHeight}` - minusHeight;
+                _this.mainHeight = _this.clientHeight + 68;
             };
-
 
             // 禁止文本选择
             document.body.onselectstart = document.body.ondrag = function () {
                 return false;
+            };
+
+            //禁止用F5键
+            document.onkeydown = function (ev) {
+                ev = window.event || ev;
+                let keycode = ev.keyCode || ev.which;
+                if (keycode === 116) {
+                    // ev.keyCode ? ev.keyCode = 0 : ev.which = 0;
+                    // ev.cancelBubble = true;
+                    return false;
+                }
             };
 
             // 程序关闭前，保存设置信息
@@ -272,11 +276,11 @@
                 return true;
             };
 
+            // 初始化数据
             _this.init_data();
         },
         mounted() {
             let _this = this;
-
 
             // 播放进度处理
             setInterval(function () {
@@ -371,7 +375,19 @@
                 P.FileName = aviObj.avi_path;
                 // P.volume = _this.volume;
                 _this.currentAviRow = aviObj;
-                _this.$refs.aviTable.setCurrentRow(_this.currentAviRow);
+                // _this.$refs.aviTable.setCurrentRow(_this.currentAviRow);
+                //高亮
+                let ads = _this.avi_data.map(function (ad, edi) {
+                    ad.highlight_class = '';
+                    if (ad.avi_name === _this.currentAviRow.avi_name) {
+                        // _this.$refs.excelTable.setCurrentRow(item);
+                        // _this.currentExcelRow = item;
+                        ad.highlight_class = 'current-row';
+                    }
+                    return ad;
+                });
+                _this.avi_data = ads;
+
                 P.currentPosition = _this.processValue;
 
                 _this.total_time = _this.format_time(_this.currentAviRow.length_second);
@@ -447,7 +463,7 @@
                         '                            <param name="volume" value="0"/>\n' +
                         '                            <param name="mute" value="false"/>\n' +
                         '                            <param name="loop" value="true"/>\n' +
-                        '                            <param name="ShowControls" value="false"/>\n'+
+                        '                            <param name="ShowControls" value="false"/>\n' +
                         '                            <param name="SendPlayStateChangeEvents" value="true">\n' +
                         '                            <param name="SendKeyboardEvents" value="true">\n' +
                         '                            <param name="SendMouseClickEvents" value="true">\n' +
@@ -465,7 +481,7 @@
                         '                            <param name="volume" value="0"/>\n' +
                         '                            <param name="mute" value="false"/>\n' +
                         '                            <param name="loop" value="true"/>\n' +
-                        '                            <param name="ShowControls" value="false"/>\n'+
+                        '                            <param name="ShowControls" value="false"/>\n' +
                         '                            <param name="SendPlayStateChangeEvents" value="true">\n' +
                         '                            <param name="SendKeyboardEvents" value="true">\n' +
                         '                            <param name="SendMouseClickEvents" value="true">\n' +
@@ -545,7 +561,16 @@
                     _this.play_type = 'primary';
                 }
             },
+            // 播放
+            list_item_play() {
+                let _this = this;
 
+                // _this.processValue = 0;
+                // P.currentPosition = _this.processValue;
+                _this.play_text = '暂停';
+                _this.play_type = 'warning';
+                P.play();
+            },
             // 停止
             stop() {
                 let _this = this;
@@ -555,6 +580,68 @@
                 _this.play_text = '播放';
                 _this.play_type = 'primary';
             },
+            // 根据视频播放时间点，反向查找对应的excel列表，高亮，并自动展开。
+            reverse_lookup() {
+                let _this = this;
+                let cp = P.currentPosition;
+                let start_time = this.currentAviRow.start_time;
+                _this.$ajax.post('http://localhost:4404/reverseLookup', {
+                    currentPosition: cp,
+                    reverse_lookup_time: _this.settings.reverse_lookup_time,
+                    start_time: start_time
+                }).then(function (res) {
+                    // alert(JSON.stringify(res));
+                    let excel_items = res.data.excel_items;
+                    if (res.data.ok && excel_items.length) {
+                        // 暂停播放
+                        P.pause();
+                        _this.play_text = '播放';
+                        _this.play_type = 'primary';
+
+                        // 高亮excel列表
+                        // _this.highlight_excel_items = res.data.excel_items;
+                        let eds = _this.excel_data.map(function (ed, edi) {
+                            ed.reverse_highlight_class = '';
+                            excel_items.forEach(function (ei, eii) {
+                                if (ed.reported_time === ei.reported_time) {
+                                    // _this.$refs.excelTable.setCurrentRow(item);
+                                    // _this.currentExcelRow = item;
+                                    ed.reverse_highlight_class = 'highlight-current-row';
+                                }
+                            });
+                            return ed;
+                        });
+                        _this.excel_data = eds;
+
+                        FI.play();
+                        _this.$message({
+                            showClose: true,
+                            message: '已找到对应时间点',
+                            type: 'success'
+                        });
+
+                    } else {
+                        _this.excel_data = _this.excel_data.map(function (ed, edi) {
+                            ed.reverse_highlight_class = '';
+                            return ed;
+                        });
+                        NF.play();
+                        _this.$message({
+                            showClose: true,
+                            message: '没有找到对应的时间点',
+                            type: 'warning'
+                        });
+                    }
+                }).catch(function (err) {
+                    _this.$message({
+                        showClose: true,
+                        message: '系统发生错误',
+                        type: 'error'
+                    });
+                });
+
+            },
+            // 上一个视频
             playPre() {
                 let _this = this;
                 for (let i = 0; i < _this.avi_data.length; i++) {
@@ -575,6 +662,7 @@
                     }
                 }
             },
+            // 下一个视频
             playNext() {
                 let _this = this;
                 for (let i = 0; i < _this.avi_data.length; i++) {
@@ -598,14 +686,14 @@
             // 快进
             fastForward() {
                 let _this = this;
-                let fft = this.settings.fast_forward_time;
+                let fft = this.settings.back_for_ward_time;
                 _this.processValue += fft;
                 P.currentPosition = _this.processValue;
             },
             // 快退
             fastBackward() {
                 let _this = this;
-                let fft = this.settings.fast_backward_time;
+                let fft = this.settings.back_for_ward_time;
                 let xxx = _this.processValue;
                 xxx -= fft;
                 // _this.processValue = xx;
@@ -688,6 +776,8 @@
             // 点击avi列表某一行
             clickAviRow(avi) {
                 let _this = this;
+                // 切换播放、暂停按钮状态
+                _this.list_item_play();
                 // _this.currentAviRow = avi;
                 // alert(JSON.stringify(avi));
                 _this.maxProcessValue = avi.length_second;
@@ -696,6 +786,8 @@
                 // P.Volume = _this.volume;
                 _this.m_play(avi);
                 P.currentPosition = 0;
+
+
             },
 
             // 选择excel文件
@@ -739,6 +831,19 @@
             clickExcelRow(excel) {
                 let _this = this;
                 _this.currentExcelRow = excel;
+
+                //高亮
+                let eds = _this.excel_data.map(function (ed, edi) {
+                    ed.highlight_class = '';
+                    if (ed.reported_time === _this.currentExcelRow.reported_time) {
+                        // _this.$refs.excelTable.setCurrentRow(item);
+                        // _this.currentExcelRow = item;
+                        ed.highlight_class = 'current-row';
+                    }
+                    return ed;
+                });
+                _this.excel_data = eds;
+
                 // 播放某个视频的某个位置
                 // alert(JSON.stringify(excel));
                 let reported_time = excel.reported_time;
@@ -749,26 +854,41 @@
                             // 高亮视频列表
                             _this.avi_data.forEach(function (item, idx) {
                                 if (item.avi_name === avi.avi_name) {
-                                    _this.$refs.aviTable.setCurrentRow(item);
-                                    _this.currentAviRow = item;
-                                    _this.m_play(item);
-                                    // 播放
-                                    // P.FileName = avi.avi_path;
-                                    // P.Volume = _this.volume;
 
+                                    P.FileName = item.avi_path;
+                                    _this.currentAviRow = item;
+                                    _this.maxProcessValue = _this.currentAviRow.length_second;
+                                    _this.total_time = _this.format_time(_this.currentAviRow.length_second);
                                     // 跳转位置，处理前置播放时间
                                     P.currentPosition = avi.offset_second - (_this.settings.pre_play_time - 4);
-                                    _this.processValue = P.currentPosition;
+                                    _this.processValue = P.currentPosition - 4;
+
+                                    // 切换播放、暂停按钮状态
+                                    _this.list_item_play();
                                 }
                             });
+                            //高亮
+                            let ads = _this.avi_data.map(function (ad, edi) {
+                                ad.highlight_class = '';
+                                if (ad.avi_name === _this.currentAviRow.avi_name) {
+                                    // _this.$refs.excelTable.setCurrentRow(item);
+                                    // _this.currentExcelRow = item;
+                                    ad.highlight_class = 'current-row';
+                                }
+                                return ad;
+                            });
+                            _this.avi_data = ads;
 
-
+                            // 播放成功提示音
+                            FI.play();
                             _this.$message({
                                 showClose: true,
                                 message: '找到视频了，已跳到相应时间开始播放',
                                 type: 'success'
                             });
                         } else { // 没有找到对应的视频
+                            // 播放失败提示音
+                            NF.play();
                             _this.$message({
                                 showClose: true,
                                 message: '没有找到对应的视频',
@@ -784,6 +904,13 @@
                         });
                     });
 
+            },
+
+            // 计算返回一行的样式
+            calRowStyle(row, rowIndex) {
+                var rhc =  row.row.reverse_highlight_class ? row.row.reverse_highlight_class : '';
+                var hc = row.row.highlight_class?row.row.highlight_class:'';
+                return [rhc, hc].join(' ');
             },
 
             // 保存设置
@@ -867,11 +994,14 @@
                 // excel列表搜索框的值
                 search_excel_value: '',
 
+                // excel列表高亮的行
+                highlight_excel_items: [],
 
                 // 高度自动化计算
                 toolbarHeight: 33,
                 processHeight: 22,
                 clientHeight: 400,
+                mainHeight: 420,
             }
         }
     }
@@ -985,4 +1115,17 @@
         margin-top: 5px;
         margin-left: 15px;
     }
+
+    /*设置对话框黑屏*/
+    .v-modal {
+        opacity: 1 !important;
+    }
+
+    /* excel列表高亮class */
+    .highlight-current-row {
+        color: green !important;
+        font-weight: bold;
+        /*background-color: #ecf5ff !important;*/
+    }
+
 </style>
