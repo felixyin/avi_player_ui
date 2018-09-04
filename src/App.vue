@@ -410,6 +410,7 @@
                                     let aviObj = res.data.aviList[i];
                                     if (aviObj.avi_name === an) { // 恢复上一次播放的地方
                                         _this.processValue = et;
+                                        aviObj.highlight_class = 'current-row';
                                         _this.m_play(aviObj);
                                     }
                                     _this.avi_data.push(aviObj);
@@ -418,6 +419,7 @@
                                 for (let i = 0; i < res.data.aviList.length; i++) {
                                     let aviObj = res.data.aviList[i];
                                     if (i === 0) { // 从第一个开始播放
+                                        aviObj.highlight_class = 'current-row';
                                         _this.m_play(aviObj);
                                     }
                                     _this.avi_data.push(aviObj);
@@ -978,12 +980,12 @@
                 },
                 // avi视频列表的数据
                 avi_data: [],
-                currentAviRow: null,
+                currentAviRow: {length_second:900},
                 // excel列表的数据
                 excel_data: [],
                 currentExcelRow: null,
                 // 视频进度条
-                maxProcessValue: 100,
+                maxProcessValue: 900,
                 processValue: 0,
                 // 进度条右边的视频总时长
                 total_time: 15,
